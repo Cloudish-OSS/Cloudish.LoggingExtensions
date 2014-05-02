@@ -15,10 +15,10 @@ namespace Cloudish.Log4Net.SignalAppender.SampleApp
         {
             log4net.Config.XmlConfigurator.Configure();
             ILog log = log4net.LogManager.GetLogger(typeof(Program));
-            
-            log.Error("This is a fatal message");
-            Console.ReadLine();
 
+            log.Error("Layout Pattern : %timestamp [%thread] %level %logger %ndc - %message%newline ");
+
+            Console.ReadLine();
         }
     }
 }
