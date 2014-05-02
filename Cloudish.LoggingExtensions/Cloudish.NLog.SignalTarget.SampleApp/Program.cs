@@ -1,27 +1,24 @@
 ﻿using NLog;
 using NLog.Config;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Cloudish.NLog.SignalTarget.SampleApp
 {
     class Program
     {
-        public static Logger logger { get; private set; }
+        public static Logger Logger { get; private set; }
 
         static void Main(string[] args)
         {            
-            ConfigurationItemFactory.Default.Targets.RegisterDefinition("SignalTarget", typeof(Cloudish.NLog.SignalTarget.SignalTarget));
-            logger = LogManager.GetCurrentClassLogger(typeof(SignalTarget));
+            ConfigurationItemFactory.Default.Targets.RegisterDefinition("SignalTarget", typeof(SignalTarget));
+            Logger = LogManager.GetCurrentClassLogger(typeof(SignalTarget));
 
-            logger.Trace("Sample trace message");
-            logger.Debug("Sample debug message");
-            logger.Info("Sample informational message");
-            logger.Warn("Sample warning message");
-            logger.Error("Sample error message");
-            logger.Fatal("Sample fatal error message");
+            Logger.Trace("Sample trace message from NLog");
+            Logger.Debug("Sample debug message from NLog");
+            Logger.Info("Sample informational message from NLog");
+            Logger.Warn("Sample warning message from NLog");
+            Logger.Error("Sample error message from NLog");
+            Logger.Fatal("Sample fatal error message from NLog");
 
             Console.ReadLine();
         }

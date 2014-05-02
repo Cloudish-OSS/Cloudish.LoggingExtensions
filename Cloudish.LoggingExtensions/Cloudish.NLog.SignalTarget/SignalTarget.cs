@@ -23,18 +23,21 @@ namespace Cloudish.NLog.SignalTarget
         /// Gets and sets the Cloudish API Key.
         /// </summary>
         [RequiredParameter]
-        public string APIKey { get; set; }
+        public string ApiKey { get; set; }
         #endregion
 
         #region TargetWithLayout Write implementation.
-        /// <see cref="TargetWithLayout Write(LogEventInfo)"/>
+
+        /// <see>
+        ///     <cref>TargetWithLayout Write(LogEventInfo)</cref>
+        /// </see>
         protected override void Write(LogEventInfo logEvent)
         {
             // Render the logging event to a string.
-            string logMessage = this.Layout.Render(logEvent); 
+            var logMessage = Layout.Render(logEvent); 
 
             // Send the log message to the web service.
-            Send(logMessage.ToString());
+            Send(logMessage);
 
         }
         #endregion
@@ -46,7 +49,7 @@ namespace Cloudish.NLog.SignalTarget
         /// <param name="message">The message to log.</param>
         protected void Send(string message)
         {
-            var url = new Uri(string.Concat(ServiceUrl, APIKey));
+            var url = new Uri(string.Concat(ServiceUrl, ApiKey));
 
             var client = new WebClient();
             client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");

@@ -1,8 +1,6 @@
 ﻿using log4net.Appender;
 using log4net.Core;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Net;
 
@@ -17,9 +15,9 @@ namespace Cloudish.Log4Net.SignalAppender
         public string ServiceUrl { get; set; }
 
         /// <summary>
-        /// Gets and sets the Cloudish API Key.
+        /// Gets and sets the Cloudish Api Key.
         /// </summary>
-        public string APIKey { get; set; }
+        public string ApiKey { get; set; }
         #endregion
 
         #region AppenderSkeleton implementation.
@@ -27,12 +25,12 @@ namespace Cloudish.Log4Net.SignalAppender
         protected override void Append(LoggingEvent loggingEvent)
         {
             // Render the logging event to a string.
-            string logMessage = RenderLoggingEvent(loggingEvent);
+            var logMessage = RenderLoggingEvent(loggingEvent);
 
             // Send the log message to the web service.
             try
             {
-                Send(logMessage.ToString());
+                Send(logMessage);
             }
             catch (Exception e)
             {
@@ -45,10 +43,11 @@ namespace Cloudish.Log4Net.SignalAppender
         protected override void Append(LoggingEvent[] loggingEvents)
         {
             // Prepare a StringBuilder to write the messages to.
-            StringBuilder logMessages = new StringBuilder();
+            var logMessages = new StringBuilder();
 
+            //TODO: In the future this will call bulk send
             // Render each logging event to a string, separating events with a new line.
-            foreach (LoggingEvent loggingEvent in loggingEvents)
+            foreach (var loggingEvent in loggingEvents)
                 logMessages.Append(RenderLoggingEvent(loggingEvent)).AppendLine();
 
             // Send the log message to the web service.
@@ -70,7 +69,7 @@ namespace Cloudish.Log4Net.SignalAppender
         /// <param name="message">The message to log.</param>
         protected void Send(string message)
         {
-            var url = new Uri(string.Concat(ServiceUrl, APIKey));
+            var url = new Uri(string.Concat(ServiceUrl, ApiKey));
 
             var client = new WebClient();
             client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
