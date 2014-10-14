@@ -1,11 +1,11 @@
-﻿using NLog;
+﻿using System.Text;
+using Newtonsoft.Json;
+using NLog;
+using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 
 namespace Cloudish.NLog.SignalTarget
 {
@@ -24,39 +24,60 @@ namespace Cloudish.NLog.SignalTarget
         /// </summary>
         [RequiredParameter]
         public string ApiKey { get; set; }
+
+        /// <summary>
+        /// Gets and sets the Cloudish signal type.
+        /// </summary>
+        [RequiredParameter]
+        public string SignalType { get; set; }
+
+        /// <summary>
+        /// Gets and sets the tags to add to all signals.
+        /// </summary>
+        [RequiredParameter]
+        public string Tags { get; set; }
+
         #endregion
 
         #region TargetWithLayout Write implementation.
 
         /// <see>
-        ///     <cref>TargetWithLayout Write(LogEventInfo)</cref>
+        ///     <cref>TargetWithLayout Write(AsyncLogEventInfo[])</cref>
         /// </see>
-        protected override void Write(LogEventInfo logEvent)
-        {
-            // Render the logging event to a string.
-            var logMessage = Layout.Render(logEvent); 
+        protected override void Write(AsyncLogEventInfo[] logEvents) {
+            var bulkSignals = new StringBuilder();
 
-            // Send the log message to the web service.
-            Send(logMessage);
+            foreach (var logEvent in logEvents) {
+                var eventInfo = logEvent.LogEvent;
+                var signal = new Signal() {
+                    Logger = "NLog",
+                    SequenceId = eventInfo.SequenceID,
+                    TimeStamp = eventInfo.TimeStamp,
+                    LogLevel = eventInfo.Level.Name,
+                    LogLevelOrdinal = eventInfo.Level.Ordinal,
+                    LoggerName = eventInfo.LoggerName,
+                    Message = eventInfo.Message,
+                    FormattedMessage = eventInfo.FormattedMessage,
+                    StackTrace = eventInfo.HasStackTrace ? eventInfo.StackTrace.ToString() : null,
+                    MethodName = eventInfo.HasStackTrace ? eventInfo.UserStackFrame.GetMethod().ToString() : null,
+                    StackFrame =
+                        eventInfo.HasStackTrace
+                            ? eventInfo.StackTrace.GetFrame(eventInfo.UserStackFrameNumber).ToString()
+                            : null,
+                    Exception = eventInfo.Exception != null ? eventInfo.Exception.ToString() : null
+                };
 
-        }
-        #endregion
+                bulkSignals.Append(string.Concat(JsonConvert.SerializeObject(signal), "\n"));
+            }
 
-        #region Internal logging handler.
-        /// <summary>
-        /// Sends the log message to the Cloudish logging service.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        protected void Send(string message)
-        {
-            var url = new Uri(string.Concat(ServiceUrl, ApiKey));
+            var url = new Uri(string.Format("{0}/{1}/{2}/{3}", ServiceUrl, ApiKey, SignalType, Tags));
 
             var client = new WebClient();
             client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
-            client.UploadStringAsync(url, "POST", message);
-
+            client.Headers.Add("cloudish-bulk", "true");
+            client.UploadStringAsync(url, "POST", bulkSignals.ToString());
         }
+
         #endregion
-        
     }
 }
