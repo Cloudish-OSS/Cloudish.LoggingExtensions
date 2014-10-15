@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using Newtonsoft.Json;
-using NLog;
 using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
@@ -49,6 +48,8 @@ namespace Cloudish.NLog.SignalTarget
 
             foreach (var logEvent in logEvents) {
                 var eventInfo = logEvent.LogEvent;
+                var rawMessage = Layout.Render(eventInfo); 
+
                 var signal = new Signal() {
                     Logger = "NLog",
                     SequenceId = eventInfo.SequenceID,
@@ -58,13 +59,8 @@ namespace Cloudish.NLog.SignalTarget
                     LoggerName = eventInfo.LoggerName,
                     Message = eventInfo.Message,
                     FormattedMessage = eventInfo.FormattedMessage,
-                    StackTrace = eventInfo.HasStackTrace ? eventInfo.StackTrace.ToString() : null,
-                    MethodName = eventInfo.HasStackTrace ? eventInfo.UserStackFrame.GetMethod().ToString() : null,
-                    StackFrame =
-                        eventInfo.HasStackTrace
-                            ? eventInfo.StackTrace.GetFrame(eventInfo.UserStackFrameNumber).ToString()
-                            : null,
-                    Exception = eventInfo.Exception != null ? eventInfo.Exception.ToString() : null
+                    StackTrace = eventInfo.StackTrace,
+                    RawMessage = rawMessage
                 };
 
                 bulkSignals.Append(string.Concat(JsonConvert.SerializeObject(signal), "\n"));

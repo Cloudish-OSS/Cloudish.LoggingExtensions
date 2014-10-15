@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Newtonsoft.Json;
 
 namespace Cloudish.NLog.SignalTarget
@@ -27,18 +28,15 @@ namespace Cloudish.NLog.SignalTarget
         public string FormattedMessage { get; set; }
 
         [JsonProperty(PropertyName = "stackTrace")]
-        public string StackTrace { get; set; }
-
-        [JsonProperty(PropertyName = "methodName")]
-        public string MethodName { get; set; }
-
-        [JsonProperty(PropertyName = "stackFrame")]
-        public string StackFrame { get; set; }
+        public StackTrace StackTrace { get; set; }
 
         [JsonProperty(PropertyName = "exception")]
-        public string Exception { get; set; }
+        public Exception Exception { get; set; }
 
         [JsonProperty(PropertyName = "logger")]
         public string Logger { get; set; }
+
+        [JsonProperty(PropertyName = "rawMessage")]
+        public string RawMessage { get; set; }
     }
 }
